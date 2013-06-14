@@ -17,7 +17,7 @@
      :quote (default \\\")
   "
   (with-open [in-file (io/reader file-name)]
-    (read-csv-input in-file)))
+    (read-csv-input in-file opts)))
 
 (defn read-csv-input [input & { no-header :no-header separator :separator quote :quote}]
   "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)"
