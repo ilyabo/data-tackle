@@ -15,9 +15,12 @@
      :no-header (default false)
      :separator (default \\,)
      :quote (default \\\")
+     :encoding  string name of encoding to use, e.g. \"UTF-8\".
   "
-  (with-open [in-file (io/reader file-name)]
-    (apply read-csv-input in-file options)))
+  (let [opts      (apply hash-map options)
+        encoding  (or (:encoding opts) "UTF-8")]
+    (with-open [in-file (io/reader file-name :encoding encoding)]
+      (apply read-csv-input in-file options))))
 
 
 (defn read-csv-input [input & options]
@@ -28,8 +31,6 @@
         no-header (if (nil? nh) false nh)
         ]
   "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)"
-    (println opts)
-    (println separator)
     (let [rows (doall
                  (csv/read-csv input
                    :separator separator
