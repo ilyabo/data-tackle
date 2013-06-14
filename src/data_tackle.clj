@@ -1,4 +1,4 @@
-(ns data-tackle.core
+(ns data-tackle
  (:import [java.net URLEncoder])
   (:require [clojure.data.csv :as csv])
   (:require [clojure.java.io  :as io])
