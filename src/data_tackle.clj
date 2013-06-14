@@ -6,15 +6,31 @@
   (:use clojure.set)
   )
 
+(declare read-csv-input)
 
-(defn read-csv [file-name & { header :header }]
+(defn read-csv [file-name & opts]
+  "Reads CSV-data from file
+
+   Valid options are
+     :no-header (default false)
+     :separator (default \\,)
+     :quote (default \\\")
+  "
   (with-open [in-file (io/reader file-name)]
-      (let [rows (doall (csv/read-csv in-file))]
-      (if header
-        (let [cols (map keyword (first rows))
-              rows (rest rows)]
-            (map #(zipmap cols %) rows))
-        rows))))
+    (read-csv-input in-file)))
+
+(defn read-csv-input [input & { no-header :no-header separator :separator quote :quote}]
+  "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)"
+    (let [rows (doall
+                 (csv/read-csv input
+                   :separator (or separator \,)
+                   :quote (or quote \\\")))]
+    (if-not no-header
+      (let [cols (map keyword (first rows))
+            rows (rest rows)]
+          (map #(zipmap cols %) rows))
+      rows)))
+
 
 
 (defn save-to-json [data output-file]
