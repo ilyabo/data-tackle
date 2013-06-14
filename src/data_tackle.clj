@@ -8,7 +8,7 @@
 
 (declare read-csv-input)
 
-(defn read-csv [file-name & opts]
+(defn read-csv [file-name & options]
   "Reads CSV-data from file
 
    Valid options are
@@ -17,19 +17,28 @@
      :quote (default \\\")
   "
   (with-open [in-file (io/reader file-name)]
-    (read-csv-input in-file opts)))
+    (apply read-csv-input in-file options)))
 
-(defn read-csv-input [input & { no-header :no-header separator :separator quote :quote}]
+
+(defn read-csv-input [input & options]
+  (let [opts      (apply hash-map options)
+        separator (or (:separator opts) \,)
+        quote     (or (:quote opts) \")
+        nh        (:no-header opts)
+        no-header (if (nil? nh) false nh)
+        ]
   "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)"
+    (println opts)
+    (println separator)
     (let [rows (doall
                  (csv/read-csv input
-                   :separator (or separator \,)
-                   :quote (or quote \\\")))]
+                   :separator separator
+                   :quote quote))]
     (if-not no-header
       (let [cols (map keyword (first rows))
             rows (rest rows)]
           (map #(zipmap cols %) rows))
-      rows)))
+      rows))))
 
 
 
