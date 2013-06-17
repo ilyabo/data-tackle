@@ -9,8 +9,8 @@
 (declare read-csv-input)
 
 (defn read-csv-file
-  [file-name
-   & opts]
+  [file-name & options]
+    (let [{:keys [encoding] :or [encoding "UTF-8"]}  options]
 
   "Reads CSV-data from file
 
@@ -18,9 +18,8 @@
      :encoding  string name of encoding to use (default UTF-8)
      + the options of (read-csv-input)
   "
-    (with-open [in-file (io/reader file-name :encoding (get opts :encoding))]
-      (apply read-csv-input in-file opts)))
-
+    (with-open [in-file (io/reader file-name :encoding encoding)]
+      (apply read-csv-input in-file options))))
 
 (defn read-csv-input
   [input
