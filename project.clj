@@ -1,4 +1,4 @@
-(defproject data-tackle "0.1.2-SNAPSHOT"
+(defproject data-tackle "0.1.3-SNAPSHOT"
   :description "A Clojure library designed for preparing data for visualizations."
   :url "http://github.com/ilyabo/data-tackle"
   :license {:name "Eclipse Public License"

@@ -6,7 +6,7 @@ A Clojure library with a number of useful functions for obtaining and preparing 
 
 If you use [Leinigen](https://github.com/technomancy/leiningen), add the following to the dependencies in your project.clj:
 
-      [data-tackle "0.1.2-SNAPSHOT"]
+      [data-tackle "0.1.3-SNAPSHOT"]
 
 Then, you can use the library functions in your code:
 
