@@ -17,6 +17,18 @@
     )))
 
 
+(deftest parse-csv-from-lines
+  (testing "Parsing csv composed from lines"
+    (let [lines   ["A;B;C" "0.80;0.38;0.24" "0.80;0.29;0.21"]
+          csv     (clojure.string/join "\n" lines)
+          parsed  (read-csv-input csv :separator \;  :use-keywords false)]
+      (is (= "0.38" (get (first parsed) "B")))
+      (is (= "0.29" (get (second parsed) "B")))
+      (is (= "0.21" (get (second parsed) "C")))
+    )))
+
+
+
 (deftest parse-csv-test-keywords
   (testing "Parsing csv with ; as separator"
     (let [csv "A;B;C\n0.80;0.38;0.24\n2.80;0.29;0.21"
