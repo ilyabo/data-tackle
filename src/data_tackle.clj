@@ -24,10 +24,11 @@
 
 (defn read-csv-input
   [input
-   & {:keys [separator quote header-rows]
+   & {:keys [separator quote header-rows use-keywords]
      :or {separator \,
           quote \"
           header-rows 1
+          use-keywords true
       }}
    ]
   "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)
@@ -36,25 +37,33 @@
                    header rows will be used to identify fields)
      :separator (default \\,)
      :quote (default \\\")
+     :use-keywords (default true) Use keywords as the field titles
     "
-    (let [rows (doall
+    (let [keywordize #(map keyword %)
+          rows (doall
                  (csv/read-csv input
                    :separator separator
                    :quote quote))]
     (if (> header-rows 0)
       (let [cols (if (> header-rows 1)
-                     (apply map vector (take header-rows rows))   ; create tuples of values of all header rows
-                                                                      ; to identify the fields
-                                                                      ; to identify the fields
-                     ;(map keyword
-                      (first rows)
-                     ; )
-                   )
+                     ; create tuples of values of all header rows
+                     ; to identify the fields
+                     (apply map vector
+                       (let [header-rows (take header-rows rows)]
+                         (if use-keywords
+                           (map #(keywordize %) header-rows)
+                           header-rows
+                         )))
+
+                   (if use-keywords
+                     (keywordize (first rows))
+                     (first rows)))
+
             rows (drop header-rows rows)]
+
 
           (map #(zipmap cols %) rows))
       rows)))
-
 
 
 (defn save-to-json [data output-file]
