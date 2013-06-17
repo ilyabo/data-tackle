@@ -13,6 +13,8 @@
 
    Valid options are
      :no-header (default false)
+     :header-rows (default 1)   (tuples of values of all corresponding
+                                 header rows will be used to identify fields)
      :separator (default \\,)
      :quote (default \\\")
      :encoding  string name of encoding to use, e.g. \"UTF-8\".
@@ -27,6 +29,7 @@
   (let [opts      (apply hash-map options)
         separator (or (:separator opts) \,)
         quote     (or (:quote opts) \")
+        num-header-rows (or (:header-rows opts) 1)
         nh        (:no-header opts)
         no-header (if (nil? nh) false nh)
         ]
@@ -36,8 +39,16 @@
                    :separator separator
                    :quote quote))]
     (if-not no-header
-      (let [cols (map keyword (first rows))
-            rows (rest rows)]
+      (let [cols (if (> num-header-rows 1)
+                     (apply map vector (take num-header-rows rows))   ; create tuples of values of all header rows
+                                                                      ; to identify the fields
+                                                                      ; to identify the fields
+                     ;(map keyword
+                      (first rows)
+                     ; )
+                   )
+            rows (drop num-header-rows rows)]
+
           (map #(zipmap cols %) rows))
       rows))))
 
