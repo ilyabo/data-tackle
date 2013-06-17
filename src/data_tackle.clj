@@ -8,49 +8,52 @@
 
 (declare read-csv-input)
 
-(defn read-csv [file-name & options]
+(defn read-csv-file
+  [file-name
+   & opts]
+
   "Reads CSV-data from file
 
    Valid options are
-     :no-header (default false)
-     :header-rows (default 1)   (tuples of values of all corresponding
-                                 header rows will be used to identify fields)
+     :encoding  string name of encoding to use (default UTF-8)
+     + the options of (read-csv-input)
+  "
+    (with-open [in-file (io/reader file-name :encoding (get opts :encoding))]
+      (apply read-csv-input in-file opts)))
+
+
+(defn read-csv-input
+  [input
+   & {:keys [separator quote header-rows]
+     :or {separator \,
+          quote \"
+          header-rows 1
+      }}
+   ]
+  "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)
+   Valid options are
+     :header-rows (default 1, 0 for no header, if > 1 tuples of values of all corresponding
+                   header rows will be used to identify fields)
      :separator (default \\,)
      :quote (default \\\")
-     :encoding  string name of encoding to use, e.g. \"UTF-8\".
-  "
-  (let [opts      (apply hash-map options)
-        encoding  (or (:encoding opts) "UTF-8")]
-    (with-open [in-file (io/reader file-name :encoding encoding)]
-      (apply read-csv-input in-file options))))
-
-
-(defn read-csv-input [input & options]
-  (let [opts      (apply hash-map options)
-        separator (or (:separator opts) \,)
-        quote     (or (:quote opts) \")
-        num-header-rows (or (:header-rows opts) 1)
-        nh        (:no-header opts)
-        no-header (if (nil? nh) false nh)
-        ]
-  "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)"
+    "
     (let [rows (doall
                  (csv/read-csv input
                    :separator separator
                    :quote quote))]
-    (if-not no-header
-      (let [cols (if (> num-header-rows 1)
-                     (apply map vector (take num-header-rows rows))   ; create tuples of values of all header rows
+    (if (> header-rows 0)
+      (let [cols (if (> header-rows 1)
+                     (apply map vector (take header-rows rows))   ; create tuples of values of all header rows
                                                                       ; to identify the fields
                                                                       ; to identify the fields
                      ;(map keyword
                       (first rows)
                      ; )
                    )
-            rows (drop num-header-rows rows)]
+            rows (drop header-rows rows)]
 
           (map #(zipmap cols %) rows))
-      rows))))
+      rows)))
 
 
 
