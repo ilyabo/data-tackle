@@ -70,17 +70,24 @@
       (json/write data wrtr)))
 
 
-(defn save-to-csv [data output-file & {renamings :rename-columns}]
-  "rename-columns is a map of renamings str->str"
-  (let [columns       (sort (apply union (map #(-> % keys set) data)))
-        column-names  (map #(if (keyword? %) (name %) (str %)) columns)
-        column-names  (if renamings (replace renamings column-names) column-names)
-        ]
+
+(defn save-to-csv
+  "The optional :columns param specifies the ordered list of columns in the output
+   (use the names or keywords before renaming).
+   :rename-columns is a map of renamings applied to the columns (str or keyword) -> str."
+  [data output-file & { columns :columns  rename-columns :rename-columns }]
+
+  (let [cols             (or columns (sort (apply union (map #(-> % keys set) data))))
+                             ; if no columns are specified use a union of all of the keys
+                             ; used by the records
+        stringify        #(if (keyword? %) (name %) (str %))
+        rename           #(if rename-columns (or (get rename-columns %) %) %)
+        column-names     (map  #(-> % rename stringify) cols)]
   (with-open [wrtr (io/writer output-file)]
       (csv/write-csv wrtr
         (concat
           [column-names]
-          (for [row data]  (map #(get row %) columns)))))))
+          (for [row data]  (map #(get row %) cols)))))))
 
 
 (defn fetch-url [address]
