@@ -121,32 +121,43 @@
 
 
 
+(defn common-prefixes
+  "Finds words in two given seqs which have common prefixes of at least min-length"
+  [words1 words2 min-length]
+  (filter #(>= (count %) min-length)
+        (for [w1 words1  w2 words2]
+          (largest-common-prefix w1 w2))))
+
 (defn common-word-prefixes [text1 text2 min-length]
-  (let [
-     words1  (words text1)
-     words2  (words text2)]
-
-    (filter #(>= (count %) min-length)
-      (for [w1 words1  w2 words2]
-        (largest-common-prefix w1 w2)
-      )))
-  )
+  (let [words1  (words text1)
+        words2  (words text2)]
+    (common-prefixes words1 words2 min-length)))
 
 
-(let [name-distance
+(let [name-similarity
       (fn [name1 name2]
-        (let [common      (common-word-prefixes (.toLowerCase name1) (.toLowerCase name2) 2)
-              common-len  (map count common)]
-          (reduce - 0 (map #(Math/pow 2 %) common-len))))]
+        (let [words1            (words (.toLowerCase name1))
+              words2            (words (.toLowerCase name2))
+              common            (common-prefixes words1 words2 2)
+              common-lengths    (map count common)
+              common-length     (reduce + common-lengths)
+              total-length      (fn [words] (reduce + (map count words)))
+              uncommon-length   (+ (total-length words1) (total-length words2) (- (* 2 common-length)))
+              score             (+ (reduce + (map #(Math/pow 10 %) common-lengths)) (- uncommon-length))]
+          score
+          ))]
 
 (defn closest-name-code-finder
-  "Finds the closest entry by name and returns its code.
-   Expects a list of entries: { :name ... :code ... }.
+  "Returns a function which finds the closest entry of the original entries by name and returns its code.
+   Expects a seq of entries: { :name ... :code ... }.
    The function can be used to find country codes by names which are not quite canonical."
-  [countries]
-    (fn [name] (apply min-key #(name-distance name (:name %)) countries))))
+  [entries]
+    (fn [name]
+      (let [get-score   (fn [country] {:country country :score (name-similarity name (:name country))})
+            scores      (map get-score entries)]
+        (reverse (sort-by :score scores))))))
 
-
+      ;(apply max-key #(name-similarity name (:name %)) countries))))
 
 (defn encode-url-params [request-params]
   (let [encode #(URLEncoder/encode (str %) "UTF-8")
