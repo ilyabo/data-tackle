@@ -155,7 +155,10 @@
     (fn [name]
       (let [get-score   (fn [country] {:country country :score (name-similarity name (:name country))})
             scores      (map get-score entries)]
-        (reverse (sort-by :score scores))))))
+        (->> scores
+              (sort-by :score)
+              (filter #(> (:score %) 0))
+              reverse)))))
 
       ;(apply max-key #(name-similarity name (:name %)) countries))))
 
