@@ -133,6 +133,21 @@
   )
 
 
+(let [name-distance
+      (fn [name1 name2]
+        (let [common      (common-word-prefixes (.toLowerCase name1) (.toLowerCase name2) 2)
+              common-len  (map count common)]
+          (reduce - 0 (map #(Math/pow 2 %) common-len))))]
+
+(defn closest-name-code-finder
+  "Finds the closest entry by name and returns its code.
+   Expects a list of entries: { :name ... :code ... }.
+   The function can be used to find country codes by names which are not quite canonical."
+  [countries]
+    (fn [name] (apply min-key #(name-distance name (:name %)) countries))))
+
+
+
 (defn encode-url-params [request-params]
   (let [encode #(URLEncoder/encode (str %) "UTF-8")
         coded (for [[n v] request-params] (str (encode n) "=" (encode v)))]
