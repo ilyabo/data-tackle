@@ -9,27 +9,19 @@
 (declare read-csv-input)
 
 (defn read-csv-file
-  [file-name & options]
-    (let [{:keys [encoding] :or [encoding "UTF-8"]}  options]
-
   "Reads CSV-data from file
 
    Valid options are
      :encoding  string name of encoding to use (default UTF-8)
      + the options of (read-csv-input)
   "
+  [file-name & options]
+    (let [{:keys [encoding] :or [encoding "UTF-8"]}  options]
+
     (with-open [in-file (io/reader file-name :encoding encoding)]
       (apply read-csv-input in-file options))))
 
 (defn read-csv-input
-  [input
-   & {:keys [separator quote header-rows use-keywords]
-     :or {separator \,
-          quote \"
-          header-rows 1
-          use-keywords true
-      }}
-   ]
   "Reads CSV-data from input (String or java.io.Reader) input (String or java.io.Reader)
    Valid options are
      :header-rows (default 1, 0 for no header, if > 1 tuples of values of all corresponding
@@ -38,6 +30,14 @@
      :quote (default \\\")
      :use-keywords (default true) Use keywords as the field titles
     "
+  [input
+   & {:keys [separator quote header-rows use-keywords]
+     :or {separator \,
+          quote \"
+          header-rows 1
+          use-keywords true
+      }}
+   ]
     (let [keywordize #(map keyword %)
           rows (doall
                  (csv/read-csv input
@@ -182,8 +182,9 @@
 
 ; see https://github.com/clojure/algo.generic/blob/master/src/main/clojure/clojure/algo/generic/functor.clj
 ; and http://stackoverflow.com/questions/1676891/mapping-a-function-on-the-values-of-a-map-in-clojure
-(defn fmap [f m]
+(defn fmap
   "Applies function f to each value of the map m."
+  [f m]
   (into (empty m) (for [[k v] m] [k (f v)])))
 
 
